@@ -29,25 +29,22 @@ variables {a : Type*} {v : Type*} (G : CFG a v)
 instance [inhabited v] : inhabited (CFG a v) :=
 ⟨CFG.mk (default v) ∅⟩
 
-/-
-Pas bon!
--/
-def eval_from (start : v) (w : list (charac a v)) : bool :=
-(start → w) ∈ G.Rules
+def eval_from (start : v) (w : list (charac a v)) : Prop :=
+∃ r ∈ G.Rules, ∃ a b c, w = a ++ b ++ c ∧ r start = b /- ∧ Reste une derniere condition apres-/
 
-def eval (w : list (charac a v)) : bool :=
+def eval (w : list (charac a v)) : Prop :=
 G.eval_from G.Start w
 
 /-
 Probleme, conversion entre `list a` et `list charac`?
 -/
 def accepts : language a :=
-λ x, G.eval x = tt
+λ x, G.eval x
 
 /-
 Encore la meme chose, conversion entre `list a` et `list charac`?
 -/
-lemma mem_accepts (m : list a) : m ∈ G.accepts ↔ G.eval_from G.Start m = tt := by refl
+lemma mem_accepts (m : list a) : m ∈ G.accepts ↔ G.eval_from G.Start m := by refl
 
 lemma pumping_lemma {x : list a} (hx : x ∈ G.accepts) :
   ∃ p ≥ 1, x.length ≥ p → 
