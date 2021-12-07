@@ -26,10 +26,33 @@ namespace CFG
 
 variables {a : Type*} {v : Type*} (G : CFG a v)
 
-/-
-Je sais pas si j'ai besoin de ça, il y avait ça dans le fichier DFA.
--/
 instance [inhabited v] : inhabited (CFG a v) :=
 ⟨CFG.mk (default v) ∅⟩
+
+/-
+Pas bon!
+-/
+def eval_from (start : v) (w : list (charac a v)) : bool :=
+(start → w) ∈ G.Rules
+
+def eval (w : list (charac a v)) : bool :=
+G.eval_from G.Start w
+
+/-
+Probleme, conversion entre `list a` et `list charac`?
+-/
+def accepts : language a :=
+λ x, G.eval x = tt
+
+/-
+Encore la meme chose, conversion entre `list a` et `list charac`?
+-/
+lemma mem_accepts (m : list a) : m ∈ G.accepts ↔ G.eval_from G.Start m = tt := by refl
+
+lemma pumping_lemma {x : list a} (hx : x ∈ G.accepts) :
+  ∃ p ≥ 1, x.length ≥ p → 
+  ∃ a b c d e, x = a ++ b ++ c ++ d ++ e ∧ b ++ d ≠ [] ∧ b.length + c.length + d.length ≤ p ∧ 
+  {a} * language.star {b} * {c} * language.star {d} * {e} ≤ G.accepts :=
+  sorry
 
 end CFG
