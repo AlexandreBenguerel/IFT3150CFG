@@ -29,8 +29,13 @@ variables {a : Type*} {v : Type*} (G : CFG a v)
 instance [inhabited v] : inhabited (CFG a v) :=
 ⟨CFG.mk (default v) ∅⟩
 
+/-
+Ici, je voudrais faire un définition récursive, mais on ne peut pas
+utiliser directement `eval_from` dans sa propre définition
+-/
 def eval_from (start : v) (w : list (charac a v)) : Prop :=
-∃ r ∈ G.Rules, ∃ a b c, w = a ++ b ++ c ∧ r start = b /- ∧ Reste une derniere condition apres-/
+∃ r ∈ G.Rules, ∃ a b c, w = a ++ b ++ c ∧  by exact r start = b 
+∧ eval_from start (a ++ [charac.var start] ++ c) 
 
 def eval (w : list (charac a v)) : Prop :=
 G.eval_from G.Start w
