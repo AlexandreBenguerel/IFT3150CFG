@@ -26,16 +26,16 @@ namespace CFG
 
 variables {a : Type*} {v : Type*} (G : CFG a v)
 
+instance charac.has_coe_a : has_coe a (charac a v) := ⟨@charac.term a v⟩
+instance : has_coe (list a) (list (charac a v)) := ⟨list.map coe⟩
+
 instance [inhabited v] : inhabited (CFG a v) :=
 ⟨CFG.mk (default v) ∅⟩
 
-/-
-Ici, je voudrais faire un définition récursive, mais on ne peut pas
-utiliser directement `eval_from` dans sa propre définition
--/
-def eval_from (start : v) (w : list (charac a v)) : Prop :=
-∃ r ∈ G.Rules, ∃ a b c, w = a ++ b ++ c ∧  by exact r start = b 
-∧ eval_from start (a ++ [charac.var start] ++ c) 
+def eval_from : v → list (charac a v) → Prop
+| start w :=
+∃ r ∈ G.Rules, ∃ a b c, w = a ++ b ++ c ∧ b ≠ [] ∧ by exact r start = b 
+∧ eval_from start (a ++ [charac.var start] ++ c)
 
 def eval (w : list (charac a v)) : Prop :=
 G.eval_from G.Start w
@@ -51,8 +51,8 @@ Encore la meme chose, conversion entre `list a` et `list charac`?
 -/
 lemma mem_accepts (m : list a) : m ∈ G.accepts ↔ G.eval_from G.Start m := by refl
 
-lemma pumping_lemma {x : list a} (hx : x ∈ G.accepts) :
-  ∃ p ≥ 1, x.length ≥ p → 
+lemma pumping_lemma :
+  ∃ p ≥ 1, ∀ x : list a, x ∈ G.accepts ∧ x.length ≥ p → 
   ∃ a b c d e, x = a ++ b ++ c ++ d ++ e ∧ b ++ d ≠ [] ∧ b.length + c.length + d.length ≤ p ∧ 
   {a} * language.star {b} * {c} * language.star {d} * {e} ≤ G.accepts :=
   sorry
